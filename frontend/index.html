@@ -1,0 +1,82 @@
+<!-- frontend/index.html -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Benzeri Uygulama</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .chat-container { width: 90%; max-width: 600px; background-color: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+        .messages { padding: 20px; overflow-y: auto; flex-grow: 1; max-height: 70vh; }
+        .message-box { padding: 10px 15px; margin-bottom: 10px; border-radius: 20px; max-width: 80%; word-wrap: break-word; }
+        .message-box.sent { background-color: #dcf8c6; align-self: flex-end; }
+        .message-box.received { background-color: #ffffff; border: 1px solid #e0e0e0; align-self: flex-start; }
+        .message-input { display: flex; padding: 10px; border-top: 1px solid #ccc; }
+        .message-input input { flex-grow: 1; border: none; padding: 10px; border-radius: 20px; background-color: #f0f2f5; margin-right: 10px; }
+        .message-input button { background-color: #075e54; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="messages" id="messages">
+            <!-- Mesajlar buraya eklenecek -->
+        </div>
+        <div class="message-input">
+            <input type="text" id="username" placeholder="Kullanıcı adınız..." />
+            <input type="text" id="message-text" placeholder="Mesajınızı yazın..." />
+            <button onclick="sendMessage()">Gönder</button>
+        </div>
+    </div>
+
+    <script>
+        const ws = new WebSocket('ws://localhost:3000'); // Docker Compose içindeki backend servisine bağlanır
+        const messagesDiv = document.getElementById('messages');
+        const messageInput = document.getElementById('message-text');
+        const usernameInput = document.getElementById('username');
+
+        ws.onopen = () => {
+            console.log('WebSocket bağlantısı kuruldu.');
+        };
+
+        ws.onmessage = event => {
+            const data = JSON.parse(event.data);
+            displayMessage(data);
+        };
+
+        function displayMessage(data) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message-box');
+            
+            // Eğer mesajı gönderen bizsek, "sent" sınıfını ekle
+            if (data.username === usernameInput.value) {
+                messageElement.classList.add('sent');
+            } else {
+                messageElement.classList.add('received');
+            }
+
+            messageElement.innerHTML = `<strong>${data.username}:</strong> ${data.text}`;
+            messagesDiv.appendChild(messageElement);
+            // Mesajlar kutusunu en alta kaydır
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function sendMessage() {
+            const username = usernameInput.value.trim();
+            const messageText = messageInput.value.trim();
+            if (messageText && username) {
+                const message = { username, text: messageText };
+                ws.send(JSON.stringify(message));
+                messageInput.value = '';
+            }
+        }
+
+        // Enter tuşuna basıldığında mesaj gönder
+        messageInput.addEventListener('keypress', event => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

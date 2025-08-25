@@ -1,0 +1,49 @@
+version: '3.8'
+
+# Tüm servisler için ortak bir network tanımla
+networks:
+  app-network:
+    driver: bridge
+
+services:
+  # MongoDB veritabanı servisi
+  mongodb:
+    image: mongo:4.4
+    container_name: mongodb_container
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db # Verilerin kalıcı olması için volume kullan
+    networks:
+      - app-network
+
+  # Backend (Node.js) servisi
+  backend:
+    build: ./backend # Backend klasöründeki Dockerfile'ı kullan
+    container_name: backend_container
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb # Backend'in veritabanı başlamadan çalışmamasını sağla
+    networks:
+      - app-network
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/chat_app # MongoDB'ye bağlanmak için URI
+
+  # Frontend (Nginx) servisi
+  frontend:
+    build: ./frontend # Frontend klasöründeki Dockerfile'ı kullan
+    container_name: frontend_container
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend # Frontend'in backend'e bağlanması için beklemesini sağla
+    networks:
+      - app-network
+
+# Veritabanı verileri için Docker volume'u
+volumes:
+  mongo-data:

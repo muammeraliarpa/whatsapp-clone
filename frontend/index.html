@@ -1,4 +1,3 @@
-<!-- frontend/index.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -30,7 +29,9 @@
     </div>
 
     <script>
-        const ws = new WebSocket('ws://localhost:3000'); // Docker Compose içindeki backend servisine bağlanır
+        // WebSocket bağlantı adresini dinamik olarak ayarla
+        // Bu, tarayıcının doğru sunucu IP'sine bağlanmasını sağlar
+        const ws = new WebSocket(`ws://${location.host}/ws`);
         const messagesDiv = document.getElementById('messages');
         const messageInput = document.getElementById('message-text');
         const usernameInput = document.getElementById('username');

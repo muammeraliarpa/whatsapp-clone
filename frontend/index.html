@@ -19,7 +19,6 @@
 <body>
     <div class="chat-container">
         <div class="messages" id="messages">
-            <!-- Mesajlar buraya eklenecek -->
         </div>
         <div class="message-input">
             <input type="text" id="username" placeholder="Kullanıcı adınız..." />
@@ -29,8 +28,6 @@
     </div>
 
     <script>
-        // WebSocket bağlantı adresini dinamik olarak ayarla
-        // Bu, tarayıcının doğru sunucu IP'sine bağlanmasını sağlar
         const ws = new WebSocket(`ws://${location.host}/ws`);
         const messagesDiv = document.getElementById('messages');
         const messageInput = document.getElementById('message-text');
@@ -49,7 +46,6 @@
             const messageElement = document.createElement('div');
             messageElement.classList.add('message-box');
             
-            // Eğer mesajı gönderen bizsek, "sent" sınıfını ekle
             if (data.username === usernameInput.value) {
                 messageElement.classList.add('sent');
             } else {
@@ -58,7 +54,6 @@
 
             messageElement.innerHTML = `<strong>${data.username}:</strong> ${data.text}`;
             messagesDiv.appendChild(messageElement);
-            // Mesajlar kutusunu en alta kaydır
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
@@ -72,7 +67,6 @@
             }
         }
 
-        // Enter tuşuna basıldığında mesaj gönder
         messageInput.addEventListener('keypress', event => {
             if (event.key === 'Enter') {
                 sendMessage();
